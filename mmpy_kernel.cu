@@ -20,7 +20,8 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 //        C[I * N + J] = _c;
     // }
     const int TW = 16;
-
+    int edge_incr = 0;
+    if(N%TW != 0) edge_incr = 1;
     __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
      int ty = threadIdx.y, tx = threadIdx.x;
      int by = blockIdx.y, bx = blockIdx.x;
@@ -46,12 +47,12 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
       //  C[(ii*TI+i)*N + jj*TJ + j] = Cij;
     // }
 
-    for(int kk = 0; kk < N/TW; kk++)
+    for(int kk = 0; kk < (N/TW)+edge_incr; kk++)
     {
 
       if((I<N)&&((kk*TW+tx)<N))
       {
-          As[ty][tx] = A[I*N+kk*TW+tx];
+          As[ty][tx] = A[I*N+(kk*TW+tx)];
       }
       else
       {
