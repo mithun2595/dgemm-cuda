@@ -20,9 +20,19 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 //        C[I * N + J] = _c;
     // }
     const int TW = 16;
+
+    const int TX = blockDim.x;
+    const int TY = blockDim.y;
+
     int edge_limit = (int) ceilf((float)N/TW);
 
+    // __shared__ _DOUBLE_ **As, **Bs;
+
+    // As = (double*) malloc(TX * TY * sizeof(double));
+    // Bs = (double*) malloc(TX * TY * sizeof(double));
+
     __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
+
      int ty = threadIdx.y, tx = threadIdx.x;
      int by = blockIdx.y, bx = blockIdx.x;
      int I = by*TW + ty, J = bx*TW + tx;
