@@ -24,18 +24,18 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
     const int TX = blockDim.x;
     const int TY = blockDim.y;
 
-    int edge_limit = (int) ceilf((float)N/TW);
+    int edge_limit = (int) ceilf((float)N/TX);
 
-    // __shared__ _DOUBLE_ **As, **Bs;
+    __shared__ _DOUBLE_ *As, *Bs;
 
-    // As = (double*) malloc(TX * TY * sizeof(double));
-    // Bs = (double*) malloc(TX * TY * sizeof(double));
+    As = (double*) malloc(TX * TY * sizeof(double));
+    Bs = (double*) malloc(TX * TY * sizeof(double));
 
-    __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
+    // __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
 
      int ty = threadIdx.y, tx = threadIdx.x;
      int by = blockIdx.y, bx = blockIdx.x;
-     int I = by*TW + ty, J = bx*TW + tx;
+     int I = by*TY + ty, J = bx*TX + tx;
     //  int i = threadIdx.y;
     //  int j = threadIdx.x;
     //  int ii = blockIdx.y;
@@ -60,18 +60,18 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
     for(int kk = 0; kk < edge_limit; kk++)
     {
 
-      if((I<N)&&((kk*TW+tx)<N))
+      if((I<N)&&((kk*TX+tx)<N))
       {
-          As[ty][tx] = A[I*N+(kk*TW+tx)];
+          As[ty][tx] = A[I*N+(kk*TX+tx)];
       }
       else
       {
         As[ty][tx] = 0;
       }
 
-      if(((kk*TW+ty)<N)&&(J<N))
+      if(((kk*TY+ty)<N)&&(J<N))
       {
-          Bs[ty][tx] = B[(kk*TW+ty)*N+J];
+          Bs[ty][tx] = B[(kk*TY+ty)*N+J];
       }
       else
       {
@@ -79,7 +79,7 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
       }
       __syncthreads();
 
-      for(int k = 0; k < TW; k++)
+      for(int k = 0; k < TX; k++)
       {
         Cij += As[ty][k]*Bs[k][tx];
       }
