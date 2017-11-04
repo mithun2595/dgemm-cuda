@@ -103,7 +103,7 @@ main(int argc, char** argv) {
 
     if( n % _nty != 0  )
         numblocksY++;
- 
+
     dim3 grid(numblocksX, numblocksY, 1);
 
     setGrid(n, threads, grid);
@@ -111,7 +111,7 @@ main(int argc, char** argv) {
     // print configurations
     printf("n: %d, tx: %d, ty: %d, gridX: %d, gridY: %d, reps: %d, epsilon: %g\n\n", n, threads.x, threads.y, grid.x, grid.y, reps, eps);
 
-  
+
 #ifndef _DOUBLE
     printf("Using Single precision arithmetic\n\n");
 #else
@@ -213,7 +213,7 @@ main(int argc, char** argv) {
     }
     else{
         Preference = cudaFuncCachePreferShared;
-    } 
+    }
     cudaFuncSetCacheConfig(matMul,Preference);
 
 
@@ -234,7 +234,7 @@ main(int argc, char** argv) {
 
     // execute the kernel
     for (int r=0; r< SCALE*reps; r++)
-        matMul<<< grid, threads >>>(n, d_C, d_A, d_B);
+        matMul<<< grid, threads>>>(n, d_C, d_A, d_B);
 
 #ifdef CUDA_TIMER
     cudaEventRecord(stop_event, 0);
