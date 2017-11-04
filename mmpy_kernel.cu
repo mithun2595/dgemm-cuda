@@ -14,7 +14,7 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
       const unsigned int by = blockIdx.y, bx = blockIdx.x;
       const unsigned int I = by*TW + ty, J = bx*TW + tx;
 
-     __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
+      register __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
 
      _DOUBLE_ Cs[4] = {0};
      As[ty][tx] = 0;
@@ -29,13 +29,13 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 
      if(N%TW !=0)
      {
-       for(int Ai =I; (Ai < N) && (Ai < I + TW); Ai +=TW/4)
+       for(int Ai =I; (Ai < N) && (Ai < I + TW); Ai +=TW1)
        {
          if(edge_limit*TW+tx < N)
           As[ty+Ai-I][tx] = A[(Ai)*N+(edge_limit*TW+tx)];
        }
        int b_start = edge_limit*TW+ty;
-       for(int Bi = b_start;(Bi<N) && (Bi < b_start+TW) ; Bi+=TW/4)
+       for(int Bi = b_start;(Bi<N) && (Bi < b_start+TW) ; Bi+=TW1)
        {
         if(J < N)
           Bs[Bi-edge_limit*TW][tx] = B[Bi*N+J];
@@ -78,6 +78,13 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 
       __syncthreads();
     }
+
+// not helping.
+
+    // for(int Ci = I,csub=0; (Ci<N)&&(Ci<I+TW); Ci += TW1,csub += 1) {
+    //   if(J<N) C[Ci*N+J] = Cs[csub];
+    // }
+
     if((J<N))
     {
       if(I+TW3 < N) {
