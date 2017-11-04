@@ -7,90 +7,119 @@ using namespace std;
 
 __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 
-    // int I =  blockIdx.y*blockDim.y + threadIdx.y;
-    // int J =  blockIdx.x*blockDim.x + threadIdx.x;
+      const unsigned int TW = 32;
+      const unsigned int TW1 = TW/4, TW2 = TW/2, TW3 = 3*TW/4;
+      const unsigned int edge_limit = (int) ceilf((float)N/TW);
+      const unsigned int ty = threadIdx.y, tx = threadIdx.x;
+      const unsigned int by = blockIdx.y, bx = blockIdx.x;
+      const unsigned int I = by*TW + ty, J = bx*TW + tx;
 
-    // if((I < N) && (J < N)){
-//        _DOUBLE_ _c = 0;
-//        for (unsigned int k = 0; k < N; k++) {
-//            _DOUBLE_ a = A[I * N + k];
-//            _DOUBLE_ b = B[k * N + J];
-//            _c += a * b;
-//        }
-//        C[I * N + J] = _c;
-    // }
-    const int TW = 16;
+     __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
 
-    const int TX = blockDim.x;
-    const int TY = blockDim.y;
-
-    int edge_limit = (int) ceilf((float)N/TX);
-
-    __shared__ _DOUBLE_ *As, *Bs;
-
-    As = (double*) malloc(TX * TY * sizeof(double));
-    Bs = (double*) malloc(TX * TY * sizeof(double));
-
-    // __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
-
-     int ty = threadIdx.y, tx = threadIdx.x;
-     int by = blockIdx.y, bx = blockIdx.x;
-     int I = by*TY + ty, J = bx*TX + tx;
-    //  int i = threadIdx.y;
-    //  int j = threadIdx.x;
-    //  int ii = blockIdx.y;
-    //  int jj = blockIdx.x;
-
-    //  int TI = 16, TJ = 16, TK = 32;
-
-     _DOUBLE_ Cij = 0;
-    // if((ii*TI + i < N) && (jj*TJ + j < N))
-    // {
-       // for(int kk = 0; kk < N; kk+= TK)
-       // {
-        //  for(int k =0; k < N; k++)
-        //  {
-        //    Cij += A[(ii*TI+i)*N + k]*B[k*N + jj*TJ + j];
-        //  }
-       // }
-
-      //  C[(ii*TI+i)*N + jj*TJ + j] = Cij;
-    // }
+     _DOUBLE_ Cs[4] = {0};
 
     for(int kk = 0; kk < edge_limit; kk++)
     {
 
-      if((I<N)&&((kk*TX+tx)<N))
+      if((kk*TW+tx)<N)
       {
-          As[ty][tx] = A[I*N+(kk*TX+tx)];
-      }
-      else
-      {
+        if(I+TW3 < N) {
+          As[ty][tx] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
+          As[ty+TW2][tx] = A[(I+TW2)*N+(kk*TW+tx)];
+          As[ty+TW3][tx] = A[(I+TW3)*N+(kk*TW+tx)];
+        } else if(I+TW2 < N){
+          As[ty][tx] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
+          As[ty+TW2][tx] = A[(I+TW2)*N+(kk*TW+tx)];
+          As[ty+TW3][TW + tx] = 0;
+        } else if(I+TW1 < N) {
+          As[ty][tx] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
+          As[ty+TW2][tx] = 0;
+          As[ty+TW3][TW + tx] = 0;
+        } else if(I < N) {
+          As[ty][tx] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx] = 0;
+          As[ty+TW2][tx] = 0;
+          As[ty+TW3][tx] = 0;
+        } else {
+          As[ty][tx] = 0;
+          As[ty+TW1][tx] = 0;
+          As[ty+TW2][tx] = 0;
+          As[ty+TW3][tx] = 0;
+        }
+
+      } else {
         As[ty][tx] = 0;
+        As[ty+TW1][tx] = 0;
+        As[ty+TW2][tx] = 0;
+        As[ty+TW3][tx] = 0;
       }
 
-      if(((kk*TY+ty)<N)&&(J<N))
+      if(J<N)
       {
-          Bs[ty][tx] = B[(kk*TY+ty)*N+J];
-      }
-      else
-      {
+        if(kk*TW+ty+TW3 < N) {
+          Bs[ty][tx] = B[(kk*TW+ty)*N+J];
+          Bs[ty+TW1][tx] = B[(kk*TW+ty+TW1)*N+J];
+          Bs[ty+TW2][tx] = B[(kk*TW+ty+TW2)*N+J];
+          Bs[ty+TW3][tx] = B[(kk*TW+ty+TW3)*N+J];
+        } else if(kk*TW+ty+TW2 < N){
+          Bs[ty][tx] = B[(kk*TW+ty)*N+J];
+          Bs[ty+TW1][tx] = B[(kk*TW+ty+TW1)*N+J];
+          Bs[ty+TW2][tx] = B[(kk*TW+ty+TW2)*N+J];
+          Bs[ty+TW3][tx] = 0;
+        } else if(kk*TW+ty+TW1 < N) {
+          Bs[ty][tx] = B[(kk*TW+ty)*N+J];
+          Bs[ty+TW1][tx] = B[(kk*TW+ty+TW1)*N+J];
+          Bs[ty+TW2][tx] = 0;
+          Bs[ty+TW3][tx] = 0;
+        } else if(kk*TW+ty < N) {
+          Bs[ty][tx] = B[(kk*TW+ty)*N+J];
+          Bs[ty+TW1][tx] = 0;
+          Bs[ty+TW2][tx] = 0;
+          Bs[ty+TW3][tx] = 0;
+        } else {
+          Bs[ty][tx] = 0;
+          Bs[ty+TW1][tx] = 0;
+          Bs[ty+TW2][tx] = 0;
+          Bs[ty+TW3][tx] = 0;
+        }
+      } else {
         Bs[ty][tx] = 0;
+        Bs[ty+TW1][tx] = 0;
+        Bs[ty+TW2][tx] = 0;
+        Bs[ty+TW3][tx] = 0;
       }
       __syncthreads();
 
-      for(int k = 0; k < TX; k++)
+      #pragma unroll
+      for(int k = 0; k < TW; k++)
       {
-        Cij += As[ty][k]*Bs[k][tx];
+        Cs[0] += As[ty][k] * Bs[k][tx];
+        Cs[1] += As[ty+TW1][k] * Bs[k][tx];
+        Cs[2] += As[ty+TW2][k] * Bs[k][tx];
+        Cs[3] += As[ty+TW3][k] * Bs[k][tx];
       }
+
       __syncthreads();
     }
-    if((I<N)&&(J<N))
+    if((J<N))
     {
-        C[I*N+J] = Cij;
+      if(I+TW3 < N) {
+        C[I*N+J] = Cs[0];
+        C[(I+TW1)*N+J] = Cs[1];
+        C[(I+TW2)*N+J] = Cs[2];
+        C[(I+TW3)*N+J] = Cs[3];
+      } else if(I+TW2 < N){
+        C[I*N+J] = Cs[0];
+        C[(I+TW1)*N+J] = Cs[1];
+        C[(I+TW2)*N+J] = Cs[2];
+      } else if(I+TW1 < N) {
+        C[I*N+J] = Cs[0];
+        C[(I+TW1)*N+J] = Cs[1];
+      } else if(I < N) {
+        C[I*N+J] = Cs[0];
+      }
     }
-
-
-
-
 }
