@@ -14,9 +14,9 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
       const unsigned int by = blockIdx.y, bx = blockIdx.x;
       const unsigned int I = by*TW + ty, J = bx*TW + tx;
 
-     __shared__ _DOUBLE_ As[TW][TW], Bs[TW][TW];
+     __shared__ _DOUBLE_ As[TW][TW][2], Bs[TW][TW][2];
 
-     _DOUBLE_ Cs[4] = {0};
+     _DOUBLE_ Cs[4][2] = {0};
 
     for(int kk = 0; kk < edge_limit; kk++)
     {
@@ -24,20 +24,20 @@ __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
       if((kk*TW+tx)<N)
       {
         if(I+TW3 < N) {
-          As[ty][tx] = A[I*N+(kk*TW+tx)];
-          As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
-          As[ty+TW2][tx] = A[(I+TW2)*N+(kk*TW+tx)];
-          As[ty+TW3][tx] = A[(I+TW3)*N+(kk*TW+tx)];
+          As[ty][tx][0] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx][0] = A[(I+TW1)*N+(kk*TW+tx)];
+          As[ty+TW2][tx][0] = A[(I+TW2)*N+(kk*TW+tx)];
+          As[ty+TW3][tx][0] = A[(I+TW3)*N+(kk*TW+tx)];
         } else if(I+TW2 < N){
-          As[ty][tx] = A[I*N+(kk*TW+tx)];
-          As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
-          As[ty+TW2][tx] = A[(I+TW2)*N+(kk*TW+tx)];
-          As[ty+TW3][tx] = 0;
+          As[ty][tx][0] = A[I*N+(kk*TW+tx)];
+          As[ty+TW1][tx][0] = A[(I+TW1)*N+(kk*TW+tx)];
+          As[ty+TW2][tx][0] = A[(I+TW2)*N+(kk*TW+tx)];
+          As[ty+TW3][TW + tx] = 0;
         } else if(I+TW1 < N) {
           As[ty][tx] = A[I*N+(kk*TW+tx)];
           As[ty+TW1][tx] = A[(I+TW1)*N+(kk*TW+tx)];
           As[ty+TW2][tx] = 0;
-          As[ty+TW3][tx] = 0;
+          As[ty+TW3][TW + tx] = 0;
         } else if(I < N) {
           As[ty][tx] = A[I*N+(kk*TW+tx)];
           As[ty+TW1][tx] = 0;
