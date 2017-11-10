@@ -7,6 +7,6 @@ void setGrid(int n, dim3 &blockDim, dim3 &gridDim)
    gridDim.y = n / (blockDim.y*8);
    if(n % blockDim.x != 0)
    	gridDim.x++;
-   if(n % blockDim.y != 0)
+   if(n % (blockDim.y*8) != 0)
     	gridDim.y++;
 }

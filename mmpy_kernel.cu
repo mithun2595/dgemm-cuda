@@ -8,7 +8,7 @@ using namespace std;
 __global__ void matMul(int N, _DOUBLE_ *C, _DOUBLE_ *A, _DOUBLE_ *B) {
 
       register const unsigned int TW = 32;
-      register const unsigned int Tw[8] = {0,TW/8, TW/4, 3*TW/8, TW/2, 5*TW/8, 3*TW/4, 7*TW/8,};
+      register const unsigned int Tw[8] = {0,TW/8, TW/4, 3*TW/8, TW/2, 5*TW/8, 3*TW/4, 7*TW/8};
       const unsigned int edge_limit = N/TW;
       const unsigned int ty = threadIdx.y, tx = threadIdx.x;
       const unsigned int by = blockIdx.y, bx = blockIdx.x;
