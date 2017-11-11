@@ -22,11 +22,11 @@ B: Sai Kishan Pampana
 (2) Estimate how much time each team member devoted to this project, in HOURS.
 
                                 A              B
-meetings                                     30
-coding                                       60
-writeup                                      5
-planning (alone)                             20
-total (including meetings)                   100
+meetings                       30             30
+coding                         60              60
+writeup                         5             5
+planning (alone)                20             20
+total (including meetings)      100             100
 
 
 (3) Describe
@@ -38,8 +38,8 @@ total (including meetings)                   100
       your team worked together;
         Sai Kishan Pampana: I've spent too much time on reading the text of the paper by volkov and the ppt of volkov. I should have tried to spend more time implementation and discuss ideas with the prof.
   (d) the lessons learned from these events;
-        Sai Kishan Pampana: I think I should have discussed the problems that I was facing with the prof more instead of trying to read the text of volkov to get my answer. I realised that discussion in this assignment helped me out a lot. 
+        Sai Kishan Pampana: I think I should have discussed the problems that I was facing with the prof more instead of trying to read the text of volkov to get my answer. I realised that discussion in this assignment helped me out a lot.
   (e) whether and how you plan to change the way your work together and
-	I think we worked pretty well together. 
+	I think we worked pretty well together.
   (f) anything else that comes to mind.
 	I had a lot of ideas that I could not put into acions. So maybe from next time I'll do it faster
