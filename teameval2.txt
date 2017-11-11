@@ -1,0 +1,45 @@
+                       CSE 260, Parallel Computation
+                                (Fall 2015)
+                Department of Computer Science and Engineering
+                     University of California, San Diego
+
+
+                Team Self Evaluation Form, Assignment #2
+
+Each team must submit one copy of this self evaluation form.
+The members of each team should discuss how they
+worked together and what to write for the evaluation.
+
+(1) List the names of your team members:
+
+A: Mithun Chakaravarrti Dharmaraj
+
+
+B: Sai Kishan Pampana
+
+
+
+(2) Estimate how much time each team member devoted to this project, in HOURS.
+
+                                A              B
+meetings                       30             
+coding                         60              
+writeup                         5            
+planning (alone)                20             
+total (including meetings)      100             
+
+
+(3) Describe
+  (a) what the major responsibilities of each team member were;
+	My major responsiblity was to make sure that all the changes mades were correct and that we have synchronized everything. Apart from that I was looking at implementation mentioned. 
+  (b) whether or not you completed the assignment;
+        Yes
+  (c) the major strengths and weaknesses in your team, e.g. how
+      your team worked together;
+	We worked pretty well together
+  (d) the lessons learned from these events;
+	I looked at a lot of different methods to check out how performance can be enhanced. 
+  (e) whether and how you plan to change the way your work together and
+	we worked pretty well together.
+  (f) anything else that comes to mind.
+	GPU is a simple thing but I felt the sheer upgrade it gave from last assignment was sruprising
